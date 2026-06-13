@@ -38,9 +38,9 @@ El script está en [`snippets/webflow-utm-capture.js`](snippets/webflow-utm-capt
 
 ---
 
-## Capturas
+## Flujo completo
 
-Flujo completo: el script captura los UTMs en Webflow, el webhook crea el lead en Pipedrive y el equipo recibe la notificación en Slack en tiempo real.
+El script captura los UTMs en Webflow, el webhook crea el lead en Pipedrive y el equipo recibe la notificación en Slack en tiempo real.
 
 ### Script de captura de UTMs instalado en Webflow
 ![Custom code en Webflow](docs/screenshots/webflow.png)
