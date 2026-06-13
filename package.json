@@ -1,5 +1,5 @@
 {
-  "name": "registro-form-en-pipedrive-notif-slack",
+  "name": "form-to-crm-slack-notif",
   "version": "1.0.0",
   "description": "Webhook que recibe submissions de Webflow, crea persona y deal en Pipedrive y notifica en Slack",
   "main": "src/index.js",
