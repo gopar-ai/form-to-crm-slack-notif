@@ -25,19 +25,6 @@ Los IDs de pipeline y stage se resuelven por nombre al arrancar y se guardan en 
 
 ---
 
-## Script de captura de UTMs (Webflow)
-
-Para que el webhook reciba `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content` y `gclid`, el formulario de Webflow necesita inyectar esos valores como campos ocultos antes de enviarse.
-
-El script está en [`snippets/webflow-utm-capture.js`](snippets/webflow-utm-capture.js). Cópialo dentro de una etiqueta `<script>` y pégalo en **Webflow → Page Settings → Custom Code → Before `</body>` tag** (o en el footer code del sitio si aplica a todas las páginas con formulario).
-
-**Qué hace:**
-- Lee `utm_*` y `gclid` de la URL y los guarda en `localStorage` para que persistan entre páginas (ej. landing → contacto).
-- Al cargar cualquier página con formularios, crea (si no existen) campos ocultos con esos valores y los inyecta en cada `<form>`.
-- Calcula `utm_source` automáticamente si no viene en la URL: `paid_media` (si hay `gclid`), `utm_manual` (si hay otros UTMs) u `organico` (si no hay ninguno) — estos son los valores que el [formato de notificación de Slack](#formato-de-notificación-de-slack) usa para etiquetar el lead.
-
----
-
 ## Flujo completo
 
 El script captura los UTMs en Webflow, el webhook crea el lead en Pipedrive y el equipo recibe la notificación en Slack en tiempo real.
@@ -50,6 +37,19 @@ El script captura los UTMs en Webflow, el webhook crea el lead en Pipedrive y el
 
 ### Notificación en Slack
 ![Notificación en Slack](docs/screenshots/slack.png)
+
+---
+
+## Script de captura de UTMs (Webflow)
+
+Para que el webhook reciba `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content` y `gclid`, el formulario de Webflow necesita inyectar esos valores como campos ocultos antes de enviarse.
+
+El script está en [`snippets/webflow-utm-capture.js`](snippets/webflow-utm-capture.js). Cópialo dentro de una etiqueta `<script>` y pégalo en **Webflow → Page Settings → Custom Code → Before `</body>` tag** (o en el footer code del sitio si aplica a todas las páginas con formulario).
+
+**Qué hace:**
+- Lee `utm_*` y `gclid` de la URL y los guarda en `localStorage` para que persistan entre páginas (ej. landing → contacto).
+- Al cargar cualquier página con formularios, crea (si no existen) campos ocultos con esos valores y los inyecta en cada `<form>`.
+- Calcula `utm_source` automáticamente si no viene en la URL: `paid_media` (si hay `gclid`), `utm_manual` (si hay otros UTMs) u `organico` (si no hay ninguno) — estos son los valores que el [formato de notificación de Slack](#formato-de-notificación-de-slack) usa para etiquetar el lead.
 
 ---
 
