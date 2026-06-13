@@ -149,13 +149,6 @@ Las notificaciones se etiquetan según `utm_source`:
 - **dotenv** — configuración por variables de entorno
 - **nodemon** — servidor de desarrollo
 
-## Limitantes actuales
-
-- Sin verificación de firma/origen del webhook: cualquiera que conozca la URL puede hacer `POST /webhook/webflow`. Pensado para correr detrás de la URL privada que Webflow asigna, no para exponerse como endpoint público conocido.
-- Sin reintentos ni cola: si Pipedrive o Slack fallan a medio proceso (ej. el deal se crea pero la nota o la notificación de Slack fallan), no hay retry automático — solo queda el log de error.
-- Sin pruebas automatizadas.
-- Pipeline/stage IDs se cargan una vez al arrancar; si se renombran en Pipedrive después, hay que reiniciar el servidor.
-
 ---
 
 ## Deployment
