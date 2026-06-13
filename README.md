@@ -25,6 +25,68 @@ Los IDs de pipeline y stage se resuelven por nombre al arrancar y se guardan en 
 
 ---
 
+## Script de captura de UTMs (Webflow)
+
+Para que el webhook reciba `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content` y `gclid`, el formulario de Webflow necesita inyectar esos valores como campos ocultos antes de enviarse.
+
+Agrega este script en **Webflow → Page Settings → Custom Code → Before `</body>` tag** (o en el footer code del sitio si aplica a todas las páginas con formulario):
+
+```html
+<script>
+(function() {
+    var params = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid'];
+    var urlParams = new URLSearchParams(window.location.search);
+
+    // 1. Guardar en Storage (Persistencia)
+    for (var i = 0; i < params.length; i++) {
+        var p = params[i];
+        var v = urlParams.get(p);
+        if (v) localStorage.setItem('store_' + p, v);
+    }
+
+    // 2. Inyectar en los campos inmediatamente al cargar la página
+    function prepararFormulario() {
+        var isAds = !!(urlParams.get('gclid') || localStorage.getItem('store_gclid'));
+        var hasUtms = !!(urlParams.get('utm_source') || localStorage.getItem('store_utm_source'));
+
+        var forms = document.querySelectorAll('form');
+        forms.forEach(function(form) {
+            params.forEach(function(p) {
+                var val = localStorage.getItem('store_' + p) || "sin_especificar";
+                if (p === 'utm_source') {
+                    val = isAds ? "paid_media" : (hasUtms ? "utm_manual" : "organico");
+                }
+
+                // Buscamos o creamos el campo ANTES del envío
+                var input = form.querySelector('input[name="' + p + '"]');
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = p;
+                    form.appendChild(input);
+                }
+                input.value = val;
+            });
+        });
+    }
+
+    // Ejecutar al cargar para que los campos estén listos antes de que se envíe el formulario
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', prepararFormulario);
+    } else {
+        prepararFormulario();
+    }
+})();
+</script>
+```
+
+**Qué hace:**
+- Lee `utm_*` y `gclid` de la URL y los guarda en `localStorage` para que persistan entre páginas (ej. landing → contacto).
+- Al cargar cualquier página con formularios, crea (si no existen) campos ocultos con esos valores y los inyecta en cada `<form>`.
+- Calcula `utm_source` automáticamente si no viene en la URL: `paid_media` (si hay `gclid`), `utm_manual` (si hay otros UTMs) u `organico` (si no hay ninguno) — estos son los valores que el [formato de notificación de Slack](#formato-de-notificación-de-slack) usa para etiquetar el lead.
+
+---
+
 ## Tech stack
 
 | Capa | Tecnología |
