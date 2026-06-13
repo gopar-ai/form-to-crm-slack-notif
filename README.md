@@ -51,8 +51,6 @@ El script captura los UTMs en Webflow, el webhook crea el lead en Pipedrive y el
 ### Notificación en Slack
 ![Notificación en Slack](docs/screenshots/slack.png)
 
-> Datos de leads reales blureados por privacidad.
-
 ---
 
 ## Setup
