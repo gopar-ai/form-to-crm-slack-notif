@@ -145,9 +145,3 @@ This is a stateless Express server — deploy it anywhere Node.js runs:
 - **Railway / Render / Fly.io**: connect the repo, set env vars, and it's live.
 - **VPS**: run `npm start` behind nginx + PM2.
 - **Webflow webhook URL**: `https://your-domain.com/webhook/webflow`
-
----
-
-## License
-
-MIT © [goparjanette-hub](https://github.com/goparjanette-hub)
