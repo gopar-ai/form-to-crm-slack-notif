@@ -1,6 +1,6 @@
 # registro-form-en-pipedrive-notif-slack
 
-Webhook que convierte un envío de formulario de Webflow en un lead completo dentro de Pipedrive y notifica al equipo en Slack — en tiempo real.
+Automatización disparada por webhook: convierte un envío de formulario de Webflow en un lead completo dentro de Pipedrive y notifica al equipo en Slack — en tiempo real.
 
 ## Cómo funciona
 
@@ -18,7 +18,7 @@ POST /webhook/webflow
        │
        ├─► Pipedrive: crear Note    (tabla HTML con todos los campos del formulario + parámetros de tracking)
        │
-       └─► Slack: enviar notificación  (color según UTM source: paid / orgánico / manual)
+       └─► Slack: enviar notificación  (etiqueta según UTM source: paid / orgánico / manual)
 ```
 
 Los IDs de pipeline y stage se resuelven por nombre al arrancar y se guardan en caché — sin overhead de búsqueda por request.
@@ -55,58 +55,33 @@ Flujo completo: el script captura los UTMs en Webflow, el webhook crea el lead e
 
 ---
 
-## Tech stack
+## Setup
 
-| Capa | Tecnología |
-|---|---|
-| Runtime | Node.js 18+ |
-| Servidor HTTP | Express |
-| Integración Pipedrive | Pipedrive REST API v1 vía Axios |
-| Integración Slack | Slack Incoming Webhooks vía Axios |
-| Configuración | dotenv |
-| Servidor de desarrollo | nodemon |
+```bash
+cp .env.example .env   # completa tus credenciales
+npm install
+npm run dev
+```
 
----
+El servidor queda escuchando en `http://localhost:3000` (o el puerto configurado), con el webhook en `POST /webhook/webflow`.
 
 ## Variables de entorno
 
-Crea un archivo `.env` en la raíz (nunca lo subas al repo):
+| Variable | Descripción |
+|---|---|
+| `PORT` | Puerto del servidor (default: `3000`) |
+| `PIPEDRIVE_API_TOKEN` | Token de API de Pipedrive |
+| `PIPEDRIVE_PIPELINE_NAME` | Nombre del pipeline donde se crean los deals (default: `custodia`) |
+| `PIPEDRIVE_STAGE_NAME` | Nombre del stage inicial del deal (default: `prospeccion`) |
+| `PIPEDRIVE_GCLID_FIELD_KEY` | Key del campo personalizado para GCLID (Person) |
+| `PIPEDRIVE_UTM_SOURCE_FIELD_KEY` / `..._MEDIUM_FIELD_KEY` / `..._CAMPAIGN_FIELD_KEY` / `..._TERM_FIELD_KEY` / `..._CONTENT_FIELD_KEY` | Keys de los campos personalizados de UTM (Person) |
+| `PIPEDRIVE_CONTACT_REASON_FIELD_KEY` | Key del campo "Motivo de contacto" (Person) |
+| `PIPEDRIVE_DUDAS_COMENTARIOS_FIELD_KEY` | Key del campo de mensaje/comentarios (Deal) |
+| `PIPEDRIVE_UTM_SOURCE_DEAL_FIELD_KEY` | Key del campo utm_source (Deal) |
+| `SLACK_WEBHOOK_URL` | Incoming Webhook de Slack (el canal ya está definido en la URL) |
+| `DISABLE_SLACK` | `true` para omitir notificaciones de Slack (ej. en staging) |
 
-```env
-# Pipedrive
-PIPEDRIVE_API_TOKEN=your_pipedrive_api_token
-PIPEDRIVE_PIPELINE_NAME=custodia          # Nombre del pipeline (default: custodia)
-PIPEDRIVE_STAGE_NAME=prospeccion          # Nombre del stage (default: prospeccion)
-
-# Keys de campos personalizados — obtenlas en Pipedrive Settings > Data Fields
-PIPEDRIVE_GCLID_FIELD_KEY=
-PIPEDRIVE_UTM_SOURCE_FIELD_KEY=
-PIPEDRIVE_UTM_MEDIUM_FIELD_KEY=
-PIPEDRIVE_UTM_CAMPAIGN_FIELD_KEY=
-PIPEDRIVE_UTM_TERM_FIELD_KEY=
-PIPEDRIVE_UTM_CONTENT_FIELD_KEY=
-PIPEDRIVE_CONTACT_REASON_FIELD_KEY=
-PIPEDRIVE_DUDAS_COMENTARIOS_FIELD_KEY=   # Deal: campo de mensaje/comentarios
-PIPEDRIVE_UTM_SOURCE_DEAL_FIELD_KEY=     # Deal: campo de utm_source
-
-# Slack
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
-
-# Opcional: poner en "true" para omitir notificaciones de Slack (ej. en staging)
-DISABLE_SLACK=false
-```
-
----
-
-## Instalación
-
-```bash
-git clone https://github.com/goparjanette-hub/registro-form-en-pipedrive-notif-slack.git
-cd registro-form-en-pipedrive-notif-slack
-npm install
-cp .env.example .env   # luego completa tus credenciales
-npm run dev
-```
+Las keys de campos personalizados de Pipedrive se obtienen en **Settings → Data Fields**.
 
 ---
 
@@ -163,6 +138,23 @@ Las notificaciones se etiquetan según `utm_source`:
 | `organico` | Nuevo Lead Orgánico 🟢 |
 | `utm_manual` | Nuevo Lead Manual 🟡 |
 | *(cualquier otro)* | Nuevo Lead ⚪ |
+
+---
+
+## Tech stack
+
+- **Node.js + Express** — servidor del webhook
+- **Pipedrive REST API v1** — Person, Organization, Deal, Note (vía Axios)
+- **Slack Incoming Webhooks** — notificación al equipo (vía Axios)
+- **dotenv** — configuración por variables de entorno
+- **nodemon** — servidor de desarrollo
+
+## Limitantes actuales
+
+- Sin verificación de firma/origen del webhook: cualquiera que conozca la URL puede hacer `POST /webhook/webflow`. Pensado para correr detrás de la URL privada que Webflow asigna, no para exponerse como endpoint público conocido.
+- Sin reintentos ni cola: si Pipedrive o Slack fallan a medio proceso (ej. el deal se crea pero la nota o la notificación de Slack fallan), no hay retry automático — solo queda el log de error.
+- Sin pruebas automatizadas.
+- Pipeline/stage IDs se cargan una vez al arrancar; si se renombran en Pipedrive después, hay que reiniciar el servidor.
 
 ---
 
