@@ -1,6 +1,6 @@
 # Tracking y registro automático de formularios 
 
-Automatización disparada por webhook: convierte un envío de formulario de Webflow en un lead completo dentro de Pipedrive y notifica al equipo en Slack — en tiempo real.
+Automatización disparada por webhook: convierte un envío de formulario de Webflow en un lead completo dentro de Pipedrive y notifica al equipo en Slack, en tiempo real.
 
 ## Cómo funciona
 
